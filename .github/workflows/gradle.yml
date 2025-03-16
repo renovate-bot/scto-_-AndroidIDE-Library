@@ -13,7 +13,7 @@ on:
 
 jobs:
   build:
-    name: Build APKs
+    name: Build LIBs
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -38,10 +38,10 @@ jobs:
       - name: Give permission to executable
         run: chmod +x gradlew
 
-      - name: Generate lkb
+      - name: Generate LIB
         run: ./gradlew assemble${{ matrix.build-type }}
 
-      - name: Upload lib
+      - name: Upload LIB
         uses: actions/upload-artifact@master
         with:
           name: lib-${{ matrix.build-type }}
