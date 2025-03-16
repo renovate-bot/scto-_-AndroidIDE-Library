@@ -29,19 +29,6 @@ jobs:
         with:
           submodules: 'true'
 
-      - name: Prepare token.properties file
-        run: |
-          if [ -f "$GITHUB_WORKSPACE/token.properties" ]; then
-            rm $GITHUB_WORKSPACE/token.properties
-          fi
-          echo "VCSPACE_TOKEN=${{ secrets.VCSPACE_TOKEN }}" >> $GITHUB_WORKSPACE/token.properties
-          echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> $GITHUB_WORKSPACE/token.properties
-          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> $GITHUB_WORKSPACE/token.properties
-          echo "OAUTH_REDIRECT_URL=${{ secrets.OAUTH_REDIRECT_URL }}" >> $GITHUB_WORKSPACE/token.properties
-
-      - name: Debug token.properties creation
-        run: ls -la $GITHUB_WORKSPACE
-
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -51,21 +38,11 @@ jobs:
       - name: Give permission to executable
         run: chmod +x gradlew
 
-      - name: Generate APK
+      - name: Generate lkb
         run: ./gradlew assemble${{ matrix.build-type }}
 
-      - name: Upload APK
+      - name: Upload lib
         uses: actions/upload-artifact@master
         with:
-          name: app-${{ matrix.build-type }}
-          path: app/build/outputs/apk/${{ matrix.build-type }}/app-${{ matrix.build-type }}.apk
-      
-      - name: Send APK to Telegram
-        if: matrix.build-type == 'release' && github.event_name != 'pull_request'
-        continue-on-error: true
-        run: |
-          curl -X POST "https://api.telegram.org/bot${{ secrets.BOT_TOKEN }}/sendDocument" \
-            -F chat_id="${{ secrets.CHAT_ID }}" \
-            -F message_thread_id="${{ secrets.RELEASE_TOPIC_ID }}" \
-            -F caption="${{ github.event.head_commit.message }} by ${{ github.actor }}" \
-            -F document=@"app/build/outputs/apk/release/app-release.apk"
+          name: lib-${{ matrix.build-type }}
+          path: lib/build/outputs/aar/${{ matrix.build-type }}/lib-${{ matrix.build-type }}.aar
